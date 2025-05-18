@@ -216,3 +216,57 @@ type Ticker struct {
 	ChangePercentage string `json:"change_percentage"`
 	Volume           string `json:"volume"`
 }
+
+type StockNewsEvent struct {
+	Symbol  string
+	Article Article
+}
+
+type Article struct {
+	Symbol             string `clover:"symbol"`
+	Title              string `clover:"title"`
+	Sentiment          string `clover:"sentiment"`
+	Content            string `clover:"content"`
+	Link               string `clover:"link"`
+	ScreenshotFilePath string `clover:"screenshotFilePath"`
+}
+
+type TickerAlt struct {
+	Rank            int    `clover:"rank"`
+	Symbol          string `clover:"symbol"`
+	Name            string `clover:"name"`
+	Sector          string `clover:"sector"`
+	MCap            string `clover:"mCap"`
+	Price           string `clover:"price"`
+	Change          string `clover:"change"`
+	Volume          string `clover:"volume"`
+	PreMarketVolume string `clover:"preMarketVolume"`
+	ChartLink       string `clover:"chartLink"`
+}
+
+type Post struct {
+	Rank    int    `clover:"rank"`
+	Symbol  string `clover:"symbol"`
+	Heading string `clover:"heading"`
+	Content string `clover:"content"`
+	News    []News `clover:"news"`
+}
+
+type News struct {
+	Time     string `clover:"time"`
+	Headline string `clover:"headline"`
+	Link     string `clover:"link"`
+}
+
+type Metrics struct {
+	Price               string `clover:"price"`
+	Change              string `clover:"change"`
+	MarketCap           string `clover:"marketCap"`
+	FiftyTwoWeekRange   string `clover:"fiftyTwoWeekRange"`
+	FiftyTwoWeekHigh    string `clover:"fiftyTwoWeekHigh"`
+	FiftyTwoWeekLow     string `clover:"fiftyTwoWeekLow"`
+	FiftyTwoWeekHighPct string `clover:"fiftyTwoWeekHighPct"`
+	FiftyTwoWeekLowPct  string `clover:"fiftyTwoWeekLowPct"`
+	Volume              string `clover:"volume"`
+	RSI14               string `clover:"rSI14"`
+}
