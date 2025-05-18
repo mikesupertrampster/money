@@ -1,17 +1,17 @@
 package bot
 
 import (
-	"awesomeProject/intelligence"
-	"awesomeProject/types"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log/slog"
+	intelligence "money/intelligence/scrape"
+	"money/types"
 	"os"
 )
 
 func getGraph(symbol string) (*os.File, error) {
-	f := intelligence.Finviz{}
-	if err := intelligence.New(&f); err != nil {
+	f, err := intelligence.NewFinviz()
+	if err != nil {
 		return nil, err
 	}
 	path, err := f.GetGraph(symbol)
@@ -28,11 +28,11 @@ func getGraph(symbol string) (*os.File, error) {
 func getMetrics(symbol string) (types.Metrics, error) {
 	var m types.Metrics
 
-	f := intelligence.Finviz{}
-	if err := intelligence.New(&f); err != nil {
+	f, err := intelligence.NewFinviz()
+	if err != nil {
 		return m, err
 	}
-	m, err := f.GetMetrics(symbol)
+	m, err = f.GetMetrics(symbol)
 	if err != nil {
 		return m, err
 	}
@@ -70,7 +70,7 @@ func getMeGraph(discord *discordgo.Session, m *discordgo.MessageCreate, symbol s
 		os.Exit(1)
 	}
 
-	if _, err := discord.ChannelMessageSendComplex(
+	if _, err = discord.ChannelMessageSendComplex(
 		m.ChannelID,
 		&discordgo.MessageSend{
 			Content: "",
