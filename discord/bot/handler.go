@@ -5,76 +5,31 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"log/slog"
 	intelligence "money/intelligence/scrape"
-	"money/types"
 	"os"
 )
 
-func getGraph(symbol string) (*os.File, error) {
-	f, err := intelligence.NewFinviz()
-	if err != nil {
-		return nil, err
-	}
-	path, err := f.GetGraph(symbol)
-	if err != nil {
-		return nil, err
-	}
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	return file, nil
-}
-
-func getMetrics(symbol string) (types.Metrics, error) {
-	var m types.Metrics
-
-	f, err := intelligence.NewFinviz()
-	if err != nil {
-		return m, err
-	}
-	m, err = f.GetMetrics(symbol)
-	if err != nil {
-		return m, err
-	}
-	return m, nil
-
-}
-
-func Oops(discord *discordgo.Session, channelID string) error {
-	if _, err := discord.ChannelMessageSend(channelID, "Oops, something went wrong... :crying_cat_face:"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func getMeGraph(discord *discordgo.Session, m *discordgo.MessageCreate, symbol string) {
-	msg := fmt.Sprintf("I see you have mentioned **%s**, I'm getting the graph for you...", symbol)
+func getMe(discord *discordgo.Session, m *discordgo.MessageCreate, symbol string) {
+	msg := fmt.Sprintf("Getting **%s**...", symbol)
 	if _, err := discord.ChannelMessageSend(m.ChannelID, msg); err != nil {
 		slog.Error(err.Error())
 		return
 	}
 
-	graph, err := getGraph(symbol)
+	finviz, err := intelligence.NewFinviz()
 	if err != nil {
 		slog.Error(err.Error())
-		err = Oops(discord, m.ChannelID)
-		if err != nil {
-			slog.Error(err.Error())
-		}
+	}
+	obj, err := finviz.GetMetrics(symbol)
+	if err != nil {
 		return
 	}
-
-	metrics, err := getMetrics(symbol)
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
+	img, err := os.Open(obj.Image)
 
 	if _, err = discord.ChannelMessageSendComplex(
 		m.ChannelID,
 		&discordgo.MessageSend{
 			Content: "",
-			Files:   []*discordgo.File{{Name: "chart.png", Reader: graph}},
+			Files:   []*discordgo.File{{Name: "chart.png", Reader: img}},
 			Embeds: []*discordgo.MessageEmbed{{
 				Type:        discordgo.EmbedTypeRich,
 				Title:       "Current Info",
@@ -83,42 +38,42 @@ func getMeGraph(discord *discordgo.Session, m *discordgo.MessageCreate, symbol s
 				Fields: []*discordgo.MessageEmbedField{
 					{
 						Name:   "Market Cap",
-						Value:  metrics.MarketCap,
+						Value:  obj.MarketCap,
 						Inline: true,
 					},
 					{
 						Name:   "Price",
-						Value:  "$" + metrics.Price,
+						Value:  "$" + obj.Price,
 						Inline: true,
 					},
 					{
 						Name:   "Change",
-						Value:  metrics.Change,
+						Value:  obj.Change,
 						Inline: true,
 					},
 					{
 						Name:   "Volume",
-						Value:  metrics.Volume,
+						Value:  obj.Volume,
 						Inline: true,
 					},
 					{
 						Name:   "52W Range",
-						Value:  metrics.FiftyTwoWeekRange,
+						Value:  obj.FiftyTwoWeekRange,
 						Inline: true,
 					},
 					{
 						Name:   "52W High",
-						Value:  metrics.FiftyTwoWeekHigh,
+						Value:  obj.FiftyTwoWeekHigh,
 						Inline: true,
 					},
 					{
 						Name:   "52W Low",
-						Value:  metrics.FiftyTwoWeekLow,
+						Value:  obj.FiftyTwoWeekLow,
 						Inline: true,
 					},
 					{
 						Name:   "RSI (14)",
-						Value:  metrics.RSI14,
+						Value:  obj.RSI14,
 						Inline: true,
 					},
 				},

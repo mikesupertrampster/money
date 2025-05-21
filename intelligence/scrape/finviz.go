@@ -3,137 +3,76 @@ package intelligence
 import (
 	"fmt"
 	"github.com/playwright-community/playwright-go"
-	"log/slog"
 	"money/intelligence"
 	"money/types"
 	"net/url"
-	"os"
+	path "path"
 	"reflect"
 	"strings"
+	"time"
 )
 
 type Finviz struct {
-	url *url.URL
+	url  *url.URL
+	page playwright.Page
+	dir  string
 }
 
 func NewFinviz() (*Finviz, error) {
+	dir := "_cache/screenshots/finviz"
+	if err := intelligence.MkDir(dir); err != nil {
+		return nil, err
+	}
+
 	u, err := url.Parse("https://finviz.com")
-	return &Finviz{url: u}, err
-}
-
-func (f *Finviz) GetTicker(page playwright.Page) (types.TickerAlt, error) {
-	var ticker types.TickerAlt
-	rows, err := page.Locator("table.styled-table-new > tbody > tr.styled-row").All()
+	page, err := intelligence.GetPlaywrightPage()
 	if err != nil {
-		return ticker, err
+		return nil, err
 	}
-
-	for idx, row := range rows {
-		elements := map[string]int{
-			"symbol": 2,
-			"name":   3,
-			"sector": 4,
-			"mcap":   7,
-			"price":  9,
-			"change": 10,
-			"volume": 11,
-		}
-		capture := make(map[string]string)
-		for key, value := range elements {
-			capture[key], err = row.Locator(fmt.Sprintf("td:nth-child(%d)", value)).TextContent(playwright.LocatorTextContentOptions{})
-			if err != nil {
-				return ticker, err
-			}
-		}
-
-		chartLink := fmt.Sprintf(f.GetUrl(capture["symbol"]))
-		ticker = types.TickerAlt{
-			Rank:      idx + 1,
-			Symbol:    capture["symbol"],
-			Name:      capture["name"],
-			Sector:    capture["sector"],
-			MCap:      capture["mcap"],
-			Price:     capture["price"],
-			Change:    capture["change"],
-			Volume:    capture["volume"],
-			ChartLink: chartLink,
-		}
-
-		page, err = intelligence.GetPlaywrightPage(chartLink)
-		if err != nil {
-			return ticker, err
-		}
-		if _, err = f.screenshot(page, capture["symbol"], ""); err != nil {
-			slog.Error(err.Error())
-		}
-	}
-	return ticker, nil
-}
-
-func (f *Finviz) screenshot(page playwright.Page, symbol string, inPath string) (string, error) {
-	if err := page.Locator("div[id='qc-cmp2-ui'] > div:nth-child(2) > div > button:nth-child(3)").Click(); err != nil {
-		slog.Error(err.Error())
-	}
-
-	file, err := os.CreateTemp("", "*.png")
-	if err != nil {
-		return "", err
-	}
-
-	if _, err = page.Screenshot(playwright.PageScreenshotOptions{
-		Path:     playwright.String(file.Name()),
-		FullPage: playwright.Bool(true),
-		Clip: &playwright.Rect{
-			X:      0,
-			Y:      310,
-			Width:  1280,
-			Height: 550,
-		},
-	}); err != nil {
-		return "", err
-	}
-	return file.Name(), nil
-}
-
-func (f *Finviz) GetGraph(symbol string) (string, error) {
-	page, err := intelligence.GetPlaywrightPage(f.GetUrl(symbol))
-	if err != nil {
-		return "", err
-	}
-
-	file, err := os.CreateTemp("", "*.png")
-	if err != nil {
-		return "", err
-	}
-
-	path, err := f.screenshot(page, symbol, file.Name())
-	if err != nil {
-		return "", err
-	}
-	if err = file.Close(); err != nil {
-		return "", err
-	}
-
-	return path, nil
-}
-
-func (f *Finviz) GetUrl(symbol string) string {
-	f.url.Path = "quote.ashx"
-	q := f.url.Query()
-	q.Set("t", symbol)
-	q.Set("ty", "c&p")
-	q.Set("d&b", "1")
-	f.url.RawQuery = q.Encode()
-	return f.url.String()
+	return &Finviz{
+		url:  u,
+		page: *page,
+		dir:  dir,
+	}, err
 }
 
 func (f *Finviz) GetMetrics(symbol string) (types.Metrics, error) {
-	m := &types.Metrics{}
-	page, err := intelligence.GetPlaywrightPage(f.GetUrl(symbol))
-	if err != nil {
-		return *m, err
+	m := types.Metrics{}
+
+	if _, err := f.page.Goto(f.chartPage(symbol), playwright.PageGotoOptions{
+		WaitUntil: playwright.WaitUntilStateLoad,
+	}); err != nil {
+		return m, err
 	}
-	table := page.Locator("table.screener_snapshot-table-body > tbody")
+	if err := f.page.Locator("div[id='qc-cmp2-ui'] > div:nth-child(2) > div > button:nth-child(3)").Click(); err != nil {
+		return m, err
+	}
+
+	m, err := f.scrapeMetrics(symbol)
+	if err != nil {
+		return m, err
+	}
+
+	p, err := f.getGraph(symbol)
+	if err != nil {
+		return m, err
+	}
+	m.Image = p
+
+	if err = f.page.Close(); err != nil {
+		return m, err
+	}
+
+	return m, nil
+}
+
+func (f *Finviz) scrapeMetrics(symbol string) (types.Metrics, error) {
+	m := &types.Metrics{
+		Symbol:    symbol,
+		TimeStamp: time.Now(),
+	}
+
+	table := f.page.Locator("table.screener_snapshot-table-body > tbody")
 	properties := map[string]struct {
 		x int
 		y int
@@ -170,4 +109,30 @@ func (f *Finviz) GetMetrics(symbol string) (types.Metrics, error) {
 		}
 	}
 	return *m, nil
+}
+
+func (f *Finviz) getGraph(symbol string) (string, error) {
+	p := path.Join(f.dir, symbol+".png")
+	if _, err := f.page.Screenshot(playwright.PageScreenshotOptions{
+		Path:     playwright.String(p),
+		FullPage: playwright.Bool(true),
+		Clip: &playwright.Rect{
+			X:      0,
+			Y:      310,
+			Width:  1280,
+			Height: 550,
+		},
+	}); err != nil {
+		return "", err
+	}
+	return p, nil
+}
+
+func (f *Finviz) chartPage(symbol string) string {
+	f.url.Path = "quote.ashx"
+	q := f.url.Query()
+	q.Set("t", symbol)
+	q.Set("p", "d")
+	f.url.RawQuery = q.Encode()
+	return f.url.String()
 }
