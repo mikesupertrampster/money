@@ -5,14 +5,15 @@ import (
 )
 
 func run() error {
-	//s, err := intelligence.NewStockTitans()
+	//s, err := intelligence.NewStockNewsAi()
 	//if err != nil {
 	//	return err
 	//}
-	//news, err := s.GetNews()
+	//news, err := s.GetEvents()
 	//if err != nil {
 	//	return err
 	//}
+	//println(len(news))
 	//
 	//for _, n := range news {
 	//	if err = n.Save(); err != nil {
@@ -20,12 +21,17 @@ func run() error {
 	//	}
 	//}
 
-	//var m types.TitanPost
+	//var m types.AiEvent
 	//all, err := m.GetAll()
 	//if err != nil {
 	//	return err
 	//}
+	//
 	//println(len(all))
+	//
+	//for _, v := range all {
+	//	println(v.Content)
+	//}
 
 	//if err = symbol.Save(); err != nil {
 	//	return err
