@@ -14,7 +14,6 @@ func getMe(discord *discordgo.Session, m *discordgo.MessageCreate, symbol string
 		slog.Error(err.Error())
 		return
 	}
-
 	finviz, err := intelligence.NewFinviz()
 	if err != nil {
 		slog.Error(err.Error())
@@ -33,7 +32,7 @@ func getMe(discord *discordgo.Session, m *discordgo.MessageCreate, symbol string
 			Embeds: []*discordgo.MessageEmbed{{
 				Type:        discordgo.EmbedTypeRich,
 				Title:       "Current Info",
-				Description: fmt.Sprintf("Ticker: [%[1]s](<https://finviz.com/quote.ashx?t=%[1]s&ty=c&p=d&b=1>)", symbol),
+				Description: fmt.Sprintf("Ticker: [%s](<%s>)", symbol, finviz.ChartPage(symbol)),
 				Color:       0x1c4399,
 				Fields: []*discordgo.MessageEmbedField{
 					{

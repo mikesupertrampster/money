@@ -39,7 +39,7 @@ func NewFinviz() (*Finviz, error) {
 func (f *Finviz) GetMetrics(symbol string) (types.Metrics, error) {
 	m := types.Metrics{}
 
-	if _, err := f.page.Goto(f.chartPage(symbol), playwright.PageGotoOptions{
+	if _, err := f.page.Goto(f.ChartPage(symbol), playwright.PageGotoOptions{
 		WaitUntil: playwright.WaitUntilStateLoad,
 	}); err != nil {
 		return m, err
@@ -128,7 +128,7 @@ func (f *Finviz) getGraph(symbol string) (string, error) {
 	return p, nil
 }
 
-func (f *Finviz) chartPage(symbol string) string {
+func (f *Finviz) ChartPage(symbol string) string {
 	f.url.Path = "quote.ashx"
 	q := f.url.Query()
 	q.Set("t", symbol)

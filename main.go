@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"money/database"
-	"money/types"
+	"money/discord/bot"
+	"os"
 )
 
 func run() error {
@@ -19,26 +19,26 @@ func run() error {
 	//	return err
 	//}
 
-	var m types.Metrics
-
-	db, err := database.Load()
-	if err != nil {
-		return err
-	}
-	err = m.Get(db, "CNEY")
-	if err != nil {
-		return err
-	}
-	println(m.Price)
+	//var m types.Metrics
+	//
+	//db, err := database.Load()
+	//if err != nil {
+	//	return err
+	//}
+	//err = m.Get(db, "CNEY")
+	//if err != nil {
+	//	return err
+	//}
+	//println(m.Price)
 
 	return nil
 }
 
 func main() {
-	//if err := bot.Start(os.Getenv("DISCORD_TOKEN")); err != nil {
-	//	log.Fatal(err)
-	//}
-	//<-make(chan struct{})
+	if err := bot.Start(os.Getenv("DISCORD_TOKEN")); err != nil {
+		log.Fatal(err)
+	}
+	<-make(chan struct{})
 
 	if err := run(); err != nil {
 		log.Fatal(err)
