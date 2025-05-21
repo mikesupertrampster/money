@@ -13,10 +13,10 @@ type DB struct {
 	Collection string
 }
 
-func Load() (DB, error) {
+func Load(collection string) (DB, error) {
 	db := DB{
 		dir:        "_cache/db",
-		Collection: "default",
+		Collection: collection,
 	}
 
 	if _, err := os.Stat(db.dir); os.IsNotExist(err) {
@@ -58,9 +58,6 @@ func (d *DB) Save(symbol string, i interface{}) error {
 		if err = d.Client.Update(d.Qry(symbol), doc.ToMap()); err != nil {
 			return err
 		}
-	}
-	if err = d.Client.Close(); err != nil {
-		return err
 	}
 
 	return nil

@@ -2,31 +2,37 @@ package main
 
 import (
 	"log"
-	"money/discord/bot"
-	"os"
 )
 
 func run() error {
-	//finviz, err := intelligence.NewFinviz()
+	//s, err := intelligence.NewStockTitans()
 	//if err != nil {
 	//	return err
 	//}
-	//symbol, err := finviz.GetMetrics("CNEY")
+	//news, err := s.GetNews()
 	//if err != nil {
 	//	return err
 	//}
+	//
+	//for _, n := range news {
+	//	if err = n.Save(); err != nil {
+	//		return err
+	//	}
+	//}
+
+	//var m types.TitanPost
+	//all, err := m.GetAll()
+	//if err != nil {
+	//	return err
+	//}
+	//println(len(all))
+
 	//if err = symbol.Save(); err != nil {
 	//	return err
 	//}
 
 	//var m types.Metrics
-	//
-	//db, err := database.Load()
-	//if err != nil {
-	//	return err
-	//}
-	//err = m.Get(db, "CNEY")
-	//if err != nil {
+	//if err := m.Get("CNEY"); err != nil {
 	//	return err
 	//}
 	//println(m.Price)
@@ -35,10 +41,10 @@ func run() error {
 }
 
 func main() {
-	if err := bot.Start(os.Getenv("DISCORD_TOKEN")); err != nil {
-		log.Fatal(err)
-	}
-	<-make(chan struct{})
+	//if err := bot.Start(os.Getenv("DISCORD_TOKEN")); err != nil {
+	//	log.Fatal(err)
+	//}
+	//<-make(chan struct{})
 
 	if err := run(); err != nil {
 		log.Fatal(err)

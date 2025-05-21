@@ -53,7 +53,7 @@ func (f *Finviz) GetMetrics(symbol string) (types.Metrics, error) {
 		return m, err
 	}
 
-	p, err := f.getGraph(symbol)
+	p, err := f.screenshot(symbol)
 	if err != nil {
 		return m, err
 	}
@@ -111,7 +111,7 @@ func (f *Finviz) scrapeMetrics(symbol string) (types.Metrics, error) {
 	return *m, nil
 }
 
-func (f *Finviz) getGraph(symbol string) (string, error) {
+func (f *Finviz) screenshot(symbol string) (string, error) {
 	p := path.Join(f.dir, symbol+".png")
 	if _, err := f.page.Screenshot(playwright.PageScreenshotOptions{
 		Path:     playwright.String(p),

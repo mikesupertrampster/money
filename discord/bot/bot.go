@@ -40,5 +40,4 @@ func messageHandler(discord *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 	}
-
 }

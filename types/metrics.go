@@ -22,17 +22,25 @@ type Metrics struct {
 }
 
 func (m *Metrics) Save() error {
-	db, err := database.Load()
+	db, err := database.Load("metrics")
 	if err != nil {
 		return err
 	}
 	if err = db.Save(m.Symbol, m); err != nil {
 		return err
 	}
+	if err = db.Client.Close(); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (m *Metrics) Get(db database.DB, symbol string) error {
+func (m *Metrics) Get(symbol string) error {
+	db, err := database.Load("metrics")
+	if err != nil {
+		return err
+	}
+
 	data, err := db.FindSymbol(symbol)
 	if err != nil {
 		return err
@@ -40,5 +48,9 @@ func (m *Metrics) Get(db database.DB, symbol string) error {
 	if err = data.Unmarshal(&m); err != nil {
 		return err
 	}
+	if err = db.Client.Close(); err != nil {
+		return err
+	}
+
 	return nil
 }
