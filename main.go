@@ -2,46 +2,34 @@ package main
 
 import (
 	"log"
+	"money/types"
 )
 
 func run() error {
-	//s, err := intelligence.NewStockNewsAi()
+	//vantage, err := api.NewAlphaVantage()
 	//if err != nil {
 	//	return err
 	//}
-	//news, err := s.GetEvents()
+
+	//feeds, err := vantage.NewsSentiments([]string{"TSLA", "AAPL"})
 	//if err != nil {
 	//	return err
 	//}
-	//println(len(news))
-	//
-	//for _, n := range news {
-	//	if err = n.Save(); err != nil {
+	//for _, feed := range feeds {
+	//	err = feed.Save()
+	//	if err != nil {
 	//		return err
 	//	}
 	//}
 
-	//var m types.AiEvent
-	//all, err := m.GetAll()
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//println(len(all))
-	//
-	//for _, v := range all {
-	//	println(v.Content)
-	//}
-
-	//if err = symbol.Save(); err != nil {
-	//	return err
-	//}
-
-	//var m types.Metrics
-	//if err := m.Get("CNEY"); err != nil {
-	//	return err
-	//}
-	//println(m.Price)
+	f := types.Feed{}
+	all, err := f.GetAll()
+	if err != nil {
+		return err
+	}
+	for _, v := range all {
+		println(v.Title)
+	}
 
 	return nil
 }

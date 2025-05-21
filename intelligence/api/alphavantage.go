@@ -28,7 +28,7 @@ func NewAlphaVantage() (*AlphaVantage, error) {
 	}, nil
 }
 
-func (a *AlphaVantage) NewsSentiments(symbols []string) (types.NewsSentiments, error) {
+func (a *AlphaVantage) NewsSentiments(symbols []string) ([]types.Feed, error) {
 	var ns types.NewsSentiments
 	a.url.Path = "query"
 	q := a.url.Query()
@@ -37,9 +37,10 @@ func (a *AlphaVantage) NewsSentiments(symbols []string) (types.NewsSentiments, e
 	a.url.RawQuery = q.Encode()
 	err := intelligence.HttpGet(a.url, &ns)
 	if err != nil {
-		return ns, err
+		return nil, err
 	}
-	return ns, nil
+
+	return ns.Feeds, nil
 }
 
 func (a *AlphaVantage) TopGainersLosers() (types.TopGainersLosers, error) {
