@@ -37,13 +37,14 @@ func (f *FinnHub) CompanyNews(symbol string) ([]finnhub.CompanyNews, error) {
 	return c, nil
 }
 
-func (f *FinnHub) BasicMetrics(symbol string) (types.Metric, error) {
-	var metric types.Metric
+func (f *FinnHub) BasicMetrics(symbol string) (types.FinnhubMetric, error) {
+	var metric types.FinnhubMetric
 	res, _, err := f.client.CompanyBasicFinancials(context.Background()).Symbol(symbol).Metric("all").Execute()
 	err = intelligence.MapToStruct(res.Metric, &metric)
 	if err != nil {
 		return metric, err
 	}
+	metric.Symbol = symbol
 	return metric, nil
 }
 

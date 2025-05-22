@@ -2,33 +2,17 @@ package main
 
 import (
 	"log"
-	"money/types"
+	"money/intelligence/scrape"
 )
 
 func run() error {
-	//vantage, err := api.NewAlphaVantage()
-	//if err != nil {
-	//	return err
-	//}
-
-	//feeds, err := vantage.NewsSentiments([]string{"TSLA", "AAPL"})
-	//if err != nil {
-	//	return err
-	//}
-	//for _, feed := range feeds {
-	//	err = feed.Save()
-	//	if err != nil {
-	//		return err
-	//	}
-	//}
-
-	f := types.Feed{}
-	all, err := f.GetAll()
+	s, err := intelligence.NewStockTwits()
 	if err != nil {
 		return err
 	}
-	for _, v := range all {
-		println(v.Title)
+	err = s.GetSentiments("AAPL")
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -39,7 +23,6 @@ func main() {
 	//	log.Fatal(err)
 	//}
 	//<-make(chan struct{})
-
 	if err := run(); err != nil {
 		log.Fatal(err)
 	}
