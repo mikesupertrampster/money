@@ -6,11 +6,11 @@ import (
 )
 
 func run() error {
-	s, err := intelligence.NewTradingView()
+	s, err := intelligence.NewQuiverQuant()
 	if err != nil {
 		return err
 	}
-	_, err = s.GetSeasonals("aapl")
+	_, err = s.GetPatents("nvda")
 	if err != nil {
 		return err
 	}

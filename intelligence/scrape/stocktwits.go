@@ -19,7 +19,7 @@ func NewStockTwits() (*StockTwits, error) {
 		return nil, err
 	}
 
-	u, err := url.Parse("https://stocktwits.com/")
+	u, err := url.Parse("https://stocktwits.com")
 	page, err := intelligence.GetPlaywrightPage()
 	if err != nil {
 		return nil, err
