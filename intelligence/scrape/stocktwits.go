@@ -31,21 +31,23 @@ func NewStockTwits() (*StockTwits, error) {
 	}, err
 }
 
-func (s *StockTwits) GetSentiments(symbol string) error {
+func (s *StockTwits) GetSentiments(symbol string) ([]string, error) {
 	s.url.Path = fmt.Sprintf("symbol/%s/sentiment", symbol)
 	if _, err := s.page.Goto(s.url.String(), playwright.PageGotoOptions{
 		WaitUntil: playwright.WaitUntilStateLoad,
 	}); err != nil {
-		return err
+		return nil, err
 	}
 	if err := s.page.Locator("button[id='onetrust-accept-btn-handler']").Click(); err != nil {
-		return err
+		return nil, err
 	}
 
 	all, err := s.page.Locator("div.grid > div:first-child.tabletXxl-down\\|m-auto").All()
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	screenshots := []string{}
 	for i, div := range all {
 		var screenshot string
 		switch i {
@@ -57,12 +59,14 @@ func (s *StockTwits) GetSentiments(symbol string) error {
 			screenshot = "participant_ratio"
 		}
 
+		p := fmt.Sprintf("%s/%s_%s.png", s.dir, symbol, screenshot)
 		if _, err = div.Screenshot(playwright.LocatorScreenshotOptions{
-			Path: playwright.String(fmt.Sprintf("%s/%s_%s.png", s.dir, symbol, screenshot)),
+			Path: playwright.String(p),
 		}); err != nil {
-			return err
+			return nil, err
 		}
+		screenshots = append(screenshots, p)
 	}
 
-	return nil
+	return screenshots, nil
 }

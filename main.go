@@ -6,11 +6,11 @@ import (
 )
 
 func run() error {
-	s, err := intelligence.NewStockTwits()
+	s, err := intelligence.NewTradingView()
 	if err != nil {
 		return err
 	}
-	err = s.GetSentiments("AAPL")
+	_, err = s.GetSeasonals("aapl")
 	if err != nil {
 		return err
 	}
